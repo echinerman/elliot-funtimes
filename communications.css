@@ -1,0 +1,72 @@
+.comm-workspace { background: #fff; border: 1px solid var(--line); border-radius: 1rem; overflow: hidden; }
+.comm-workspace[hidden], [data-communication-enabled][hidden] { display: none; }
+.comm-header { display: flex; align-items: center; flex-wrap: wrap; gap: 1rem; padding: 1.25rem; border-bottom: 1px solid var(--line); }
+.comm-identity { flex: 1 1 18rem; min-width: 0; }
+.comm-identity h1 { color: var(--ink); font-size: clamp(1.35rem, 2.2vw, 1.85rem); font-weight: 800; overflow-wrap: anywhere; }
+.comm-identity p, .comm-meta { color: var(--copy); font-size: .72rem; line-height: 1.6; overflow-wrap: anywhere; }
+.comm-columns { display: grid; grid-template-columns: minmax(0, 1fr) minmax(16rem, 24rem); }
+.comm-conversation, .comm-context { min-width: 0; }
+.comm-context { border-left: 1px solid var(--line); padding: 1.5rem; }
+.comm-context section + section { border-top: 1px solid var(--line); margin-top: 1.5rem; padding-top: 1.5rem; }
+.comm-context h2 { font-weight: 800; color: var(--ink); margin-bottom: .75rem; }
+.comm-context p { font-size: .875rem; line-height: 1.6; color: var(--copy); overflow-wrap: anywhere; }
+.comm-context label { display: block; margin: 1rem 0 .4rem; font-size: .72rem; font-weight: 600; }
+.comm-context .user-profile-button { margin-top: .7rem; }
+.comm-context-row + .comm-context-row { margin-top: 1rem; }
+.comm-context-row strong { font-size: .875rem; overflow-wrap: anywhere; }
+.comm-message { padding: 1.5rem; border-bottom: 1px solid var(--line); }
+.comm-message[data-direction="outbound"] { background: #f8fafc; border-left: 1px solid var(--emerald); }
+.comm-message header { display: flex; align-items: center; gap: .65rem 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
+.comm-message header strong { font-size: .875rem; overflow-wrap: anywhere; }
+.comm-message time { font-size: .72rem; color: var(--copy); }
+.comm-body { white-space: pre-wrap; overflow-wrap: anywhere; font-size: .875rem; line-height: 1.75; color: var(--ink); }
+.comm-message-actions { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1rem; }
+.comm-state { display: inline-block; color: #334155; background: #f1f5f9; border-radius: 999px; padding: .25rem .6rem; font-size: .72rem; font-weight: 600; }
+.comm-state[data-state="sent"], .comm-state[data-state="resolved"] { background: #d1fae5; color: #064e3b; }
+.comm-state[data-state="uncertain"], .comm-state[data-state="needs_review"] { background: #fef3c7; color: #78350f; }
+.comm-state[data-state="failed"] { background: #ffe4e6; color: #9f1239; }
+.comm-warning { margin-top: 1rem; font-size: .875rem; line-height: 1.6; color: #92400e; }
+.comm-notice-failure { flex-basis: 100%; font-size: .875rem; line-height: 1.6; color: #92400e; }
+.comm-notice-failure button { margin-left: .5rem; }
+.comm-composer textarea::placeholder { color: #64748b; }
+.comm-composer { padding: 1.5rem; }
+.comm-composer label { display: block; font-weight: 800; margin-bottom: .4rem; }
+.comm-composer input { width: 100%; margin-bottom: 1.25rem; }
+.comm-composer > .comm-meta { margin-bottom: 1.25rem; }
+.comm-composer [readonly] { background: var(--mist); }
+.comm-composer > [role="status"] { margin-top: 1rem; color: var(--copy); font-size: .875rem; line-height: 1.7; }
+.comm-composer textarea { width: 100%; margin-top: .8rem; resize: vertical; }
+.comm-composer-actions { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-top: 1rem; }
+.comm-composer-actions [role="status"] { font-size: .875rem; color: var(--copy); }
+.comm-status-label { display: grid; gap: .3rem; font-size: .72rem; color: var(--copy); }
+.comm-thread-row { display: grid; width: 100%; grid-template-columns: minmax(0, 1fr) auto 11rem; text-align: left; gap: 1rem; padding: 1.15rem 1.5rem; border-top: 1px solid var(--line); align-items: center; }
+.comm-thread-row:hover { background: #f8fafc; }
+.comm-thread-row strong { display: block; font-size: 1rem; overflow-wrap: anywhere; }
+.comm-thread-row .comm-meta { display: block; }
+.comm-empty { padding: 2rem 1.5rem; font-size: .875rem; color: var(--copy); line-height: 1.7; }
+.comm-empty a { text-decoration: underline; text-underline-offset: .2em; }
+.comm-support-form { border-top: 1px solid var(--line); padding-top: 1.5rem; margin-top: 1.25rem; }
+.comm-support-form[hidden] { display: none; }
+.comm-support-form label { display: grid; gap: .45rem; margin-bottom: 1rem; font-size: .875rem; font-weight: 600; }
+.comm-support-form p { margin-bottom: 1rem; font-size: .875rem; line-height: 1.6; color: var(--copy); }
+.comm-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.comm-support-form .portal-field { width: 100%; }
+@media (max-width: 1000px) { .comm-columns { grid-template-columns: 1fr; } .comm-context { border-left: 0; border-top: 1px solid var(--line); } }
+@media (max-width: 720px) {
+    #people-table, #people-table tbody { display: block; width: 100%; min-width: 0; }
+    #people-table thead { display: none; }
+    #people-table tr { display: grid; grid-template-columns: minmax(0, 1fr); padding: .75rem 0; }
+    #people-table td { display: block; min-width: 0; max-width: 100%; padding: .5rem 1rem; overflow-wrap: anywhere; text-align: left; }
+    #people-table td:nth-child(2) > div { display: flex; width: 100%; min-width: 0; flex-wrap: wrap; gap: .5rem; }
+    #people-table td:nth-child(3)::before { content: 'Default room: '; color: var(--copy); }
+    #people-table td:last-child { display: flex; flex-wrap: wrap; gap: .5rem; }
+    .comm-header { align-items: stretch; }
+    .comm-identity { flex-basis: 100%; }
+    .comm-status-label { flex: 1; }
+    .comm-message, .comm-composer, .comm-context { padding: 1.1rem; }
+    .comm-thread-row { grid-template-columns: 1fr auto; padding: 1rem; }
+    .comm-thread-row > .comm-meta { grid-column: 1 / -1; }
+    .comm-form-row { grid-template-columns: 1fr; gap: 0; }
+    .comm-composer .user-profile-button { width: 100%; }
+    .comm-workspace input, .comm-workspace textarea, .comm-workspace select, .comm-support-form input, .comm-support-form select, .comm-support-form textarea { font-size: 1rem; }
+}

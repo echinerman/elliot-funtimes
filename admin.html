@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Operations | Elliot's Private Clubhouse</title>
+    <link rel="stylesheet" href="./communications.css?v=20261104-prospects">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { 900: '#111827' }
+                    },
+                    boxShadow: {
+                        float: '0 24px 80px rgba(15, 23, 42, 0.12)'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @font-face {
+            font-family: "Sora";
+            src: url("./assets/fonts/sora-400.woff2") format("woff2");
+            font-display: swap;
+            font-style: normal;
+            font-weight: 400;
+        }
+        @font-face {
+            font-family: "Sora";
+            src: url("./assets/fonts/sora-600.woff2") format("woff2");
+            font-display: swap;
+            font-style: normal;
+            font-weight: 500 700;
+        }
+        @font-face {
+            font-family: "Sora";
+            src: url("./assets/fonts/sora-800.woff2") format("woff2");
+            font-display: swap;
+            font-style: normal;
+            font-weight: 800 900;
+        }
+        :root {
+            color-scheme: light;
+            --ink: #020617;
+            --ink-soft: #0f172a;
+            --paper: #ffffff;
+            --mist: #f1f5f9;
+            --line: #e2e8f0;
+            --copy: #475569;
+            --muted: #94a3b8;
+            --emerald: #10b981;
+            --amber: #d97706;
+            --rose: #e11d48;
+            --ease-out: cubic-bezier(.16, 1, .3, 1);
+        }
+
+        html { scroll-behavior: smooth; }
+        body { background: var(--mist); font-family: "Sora", sans-serif; font-feature-settings: "tnum" 1, "ss01" 1; }
+        ::selection { background: #a7f3d0; color: var(--ink); }
+        * { scrollbar-color: #64748b var(--ink); scrollbar-width: thin; }
+        *:focus-visible { outline: 3px solid #34d399; outline-offset: 3px; }
+        input::placeholder, textarea::placeholder { color: #64748b; opacity: 1; }
+
+        .admin-shell { min-height: 100vh; display: grid; grid-template-columns: 15.5rem minmax(0, 1fr); }
+        .admin-room-rail {
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            display: flex;
+            height: 100vh;
+            flex-direction: column;
+            overflow-y: auto;
+            background: var(--ink);
+            color: #fff;
+            box-shadow: 12px 0 36px rgba(2, 6, 23, .12);
+        }
+        .admin-rail-inner { display: flex; min-height: 100%; flex-direction: column; padding: 1.5rem 1rem 1rem; }
+        .admin-brand { display: flex; align-items: center; gap: .75rem; padding: .25rem .75rem 1.5rem; }
+        .admin-brand-mark { display: grid; width: 2.5rem; height: 2.5rem; place-items: center; border-radius: .75rem; background: var(--emerald); color: var(--ink); font-weight: 900; box-shadow: 0 10px 24px rgba(16, 185, 129, .22); }
+        .admin-brand-name { font-size: .95rem; font-weight: 900; letter-spacing: -.02em; }
+        .admin-brand-subtitle { margin-top: .12rem; color: #94a3b8; font-size: .72rem; }
+        .admin-rail-close { display: none; margin-left: auto; color: #cbd5e1; }
+        .admin-nav { display: grid; gap: .35rem; }
+        .admin-nav-label { padding: 1rem .75rem .4rem; color: #64748b; font-size: .72rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+        .admin-nav-item {
+            position: relative;
+            display: flex;
+            min-height: 2.85rem;
+            align-items: center;
+            gap: .8rem;
+            border-radius: .75rem;
+            padding: .7rem .8rem;
+            color: #cbd5e1;
+            font-size: .86rem;
+            font-weight: 750;
+            transition: background-color .2s ease, color .2s ease, transform .35s var(--ease-out);
+        }
+        .admin-nav-item i { width: 1.2rem; color: #64748b; text-align: center; }
+        .admin-nav-item:hover { background: rgba(255, 255, 255, .07); color: #fff; transform: translateX(2px); }
+        .admin-nav-item.is-active { background: rgba(16, 185, 129, .12); color: #fff; }
+        .admin-nav-item.is-active::before { position: absolute; inset-block: .55rem; left: 0; width: 1px; background: #34d399; content: ""; }
+        .admin-nav-item.is-active i { color: #34d399; }
+        .admin-account { margin-top: auto; border-top: 1px solid rgba(148, 163, 184, .18); padding: 1rem .75rem .25rem; }
+        .admin-account-name { color: #fff; font-size: .8rem; font-weight: 850; }
+        .admin-account-email { margin-top: .2rem; overflow: hidden; color: #64748b; font-size: .7rem; text-overflow: ellipsis; white-space: nowrap; }
+        .admin-signout { margin-top: .9rem; display: inline-flex; align-items: center; gap: .5rem; color: #94a3b8; font-size: .76rem; font-weight: 750; }
+        .admin-signout:hover { color: #fff; }
+
+        .admin-workspace { min-width: 0; }
+        .admin-mobilebar { display: none; min-height: 4rem; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); background: rgba(255, 255, 255, .97); padding: .75rem 1rem; }
+        .admin-mobilebar button { display: inline-flex; min-height: 2.75rem; align-items: center; gap: .65rem; font-size: .82rem; font-weight: 850; }
+        .admin-mobilebar span { color: var(--copy); font-size: .76rem; font-weight: 750; }
+        .admin-header { border-bottom: 1px solid var(--line); background: #fff; }
+        .admin-header-inner { display: flex; width: min(100%, 92rem); margin: 0 auto; align-items: flex-end; justify-content: space-between; gap: 2rem; padding: 2.25rem clamp(1rem, 3vw, 3rem) 1.75rem; }
+        .admin-header h1 { color: var(--ink); font-size: clamp(2.15rem, 4vw, 3.8rem); font-weight: 900; letter-spacing: -.035em; line-height: .95; }
+        .admin-header p { max-width: 66ch; margin-top: .85rem; color: var(--copy); font-size: .9rem; line-height: 1.6; }
+        .admin-header-actions { display: flex; flex: none; flex-wrap: wrap; gap: .65rem; }
+        .admin-canvas { width: min(100%, 92rem); margin: 0 auto; padding: clamp(1.25rem, 3vw, 2.5rem); }
+
+        .admin-tabs { display: flex; flex-wrap: wrap; gap: .5rem; border-bottom: 1px solid var(--line); }
+        .admin-tabs button { margin-bottom: -1px; border-bottom: 2px solid transparent; padding: .85rem 1rem; color: #64748b; font-size: .8rem; font-weight: 850; }
+        .admin-tabs button.is-active { border-bottom-color: var(--ink); color: var(--ink); }
+
+        .admin-paper { overflow: hidden; border: 1px solid #dbe3ec; border-radius: 1rem; background: #fff; box-shadow: 0 20px 55px rgba(15, 23, 42, .07); }
+        .admin-paper-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 1.5rem; border-bottom: 1px solid var(--line); padding: 1.5rem; }
+        .admin-paper-head h2 { color: var(--ink); font-size: clamp(1.35rem, 2.2vw, 1.85rem); font-weight: 900; letter-spacing: -.025em; }
+        .admin-paper-head p { max-width: 68ch; margin-top: .45rem; color: var(--copy); font-size: .82rem; line-height: 1.55; }
+
+        .ops-filter-bar { display: flex; flex-wrap: wrap; gap: .5rem; border-bottom: 1px solid var(--line); padding: .9rem 1.25rem; }
+        .ops-filter { border: 1px solid #cbd5e1; border-radius: 999px; padding: .55rem .8rem; color: #475569; font-size: .72rem; font-weight: 850; }
+        .ops-filter:hover { border-color: #475569; color: var(--ink); }
+        .ops-filter.is-active { border-color: var(--ink); background: var(--ink); color: #fff; }
+        .ops-filter-count { margin-left: .35rem; color: inherit; opacity: .72; }
+        .ops-row { position: relative; display: grid; grid-template-columns: 6.5rem minmax(0, 1fr) auto; align-items: center; gap: 1rem; border-bottom: 1px solid var(--line); padding: 1rem 1.25rem; transition: background-color .2s ease, padding .35s var(--ease-out); }
+        .ops-row:last-child { border-bottom: 0; }
+        .ops-row:hover { background: #f8fafc; padding-inline: 1.55rem; }
+        .ops-row::before { position: absolute; inset-block: 0; left: 0; width: 1px; background: var(--ops-accent, #94a3b8); content: ""; }
+        .ops-kind { display: inline-flex; width: max-content; align-items: center; gap: .4rem; border-radius: 999px; background: #f1f5f9; padding: .35rem .55rem; color: #475569; font-size: .72rem; font-weight: 850; }
+        .ops-title { color: var(--ink); font-size: .9rem; font-weight: 900; }
+        .ops-copy { margin-top: .2rem; color: #64748b; font-size: .76rem; line-height: 1.45; }
+        .ops-action { border: 1px solid #cbd5e1; border-radius: 999px; padding: .55rem .75rem; color: #334155; font-size: .72rem; font-weight: 850; }
+        .ops-action:hover { border-color: var(--ink); color: var(--ink); }
+        .ops-row-actions { display: flex; flex-wrap: wrap; gap: .5rem; }
+        .ops-row.is-open { background: #f8fafc; }
+        .ops-row.is-open::before { background: var(--emerald); }
+        .ops-detail {
+            display: flex;
+            max-height: 0;
+            grid-column: 2 / -1;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            visibility: hidden;
+            overflow: hidden;
+            border-top: 1px solid transparent;
+            padding-top: 0;
+            opacity: 0;
+            transform: translateY(-.3rem);
+            transition: max-height .42s var(--ease-out), padding .42s var(--ease-out), border-color .2s ease, opacity .2s ease, transform .42s var(--ease-out), visibility .42s;
+        }
+        .ops-row.is-open .ops-detail { max-height: 11rem; visibility: visible; border-top-color: var(--line); padding-top: .9rem; opacity: 1; transform: translateY(0); }
+        .ops-detail p { max-width: 70ch; color: #475569; font-size: .78rem; line-height: 1.55; }
+        .ops-detail button { flex: none; border-radius: .7rem; background: var(--ink); padding: .65rem .8rem; color: #fff; font-size: .72rem; font-weight: 850; }
+        .ops-empty { padding: 2.5rem 1.25rem; text-align: center; }
+        .ops-empty strong { color: var(--ink); font-size: .95rem; }
+        .ops-empty p { margin: .35rem auto 0; max-width: 54ch; color: #64748b; font-size: .78rem; line-height: 1.55; }
+
+        .catalog-section { padding: clamp(1.35rem, 3vw, 2.25rem); }
+        .catalog-section + .catalog-section { border-top: 1px solid var(--line); }
+        .catalog-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 1.25rem; }
+        .catalog-head h2 { color: var(--ink); font-size: clamp(1.3rem, 2vw, 1.7rem); font-weight: 900; letter-spacing: -.025em; }
+        .catalog-head p { max-width: 68ch; margin-top: .4rem; color: var(--copy); font-size: .8rem; line-height: 1.55; }
+        .catalog-head-actions { display: flex; flex: none; gap: .55rem; }
+        .catalog-button { display: inline-flex; min-height: 2.65rem; align-items: center; justify-content: center; gap: .5rem; border: 1px solid #cbd5e1; border-radius: .75rem; padding: .65rem .85rem; color: #334155; font-size: .74rem; font-weight: 850; }
+        .catalog-button:hover { border-color: var(--ink); color: var(--ink); }
+        .catalog-button.is-primary { border-color: var(--ink); background: var(--ink); color: #fff; }
+        .catalog-button:disabled { cursor: not-allowed; opacity: .5; }
+        .catalog-migration { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: 1.25rem; border-block: 1px solid #fde68a; background: #fffbeb; padding: .9rem 1rem; }
+        .catalog-migration[hidden] { display: none; }
+        .catalog-migration strong { color: #78350f; font-size: .78rem; }
+        .catalog-migration p { margin-top: .2rem; color: #92400e; font-size: .72rem; line-height: 1.5; }
+        .catalog-composer { margin-top: 1.25rem; border-block: 1px solid var(--line); background: #f8fafc; padding: 1rem; }
+        .catalog-composer[hidden] { display: none; }
+        .catalog-composer-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: .85rem; }
+        .catalog-composer-head h3 { color: var(--ink); font-size: .86rem; font-weight: 900; }
+        .catalog-form-grid { display: grid; grid-template-columns: minmax(12rem, 1.6fr) minmax(8rem, .7fr) minmax(7rem, .6fr) minmax(7rem, .6fr); gap: .75rem; }
+        .catalog-field span { display: block; margin-bottom: .4rem; color: #475569; font-size: .72rem; font-weight: 850; }
+        .catalog-field input, .catalog-field select { width: 100%; min-height: 2.8rem; border: 1px solid #cbd5e1; border-radius: .8rem; background: #fff; padding: .7rem .8rem; color: var(--ink); font-size: .8rem; }
+        .catalog-field input:read-only { background: #e2e8f0; color: #475569; }
+        .catalog-toggle { display: inline-flex; min-height: 2.8rem; align-items: center; gap: .55rem; color: #334155; font-size: .76rem; font-weight: 800; }
+        .catalog-toggle input { width: 1rem; height: 1rem; accent-color: var(--emerald); }
+        .catalog-composer-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .55rem; margin-top: .85rem; }
+        .catalog-list { margin-top: 1.25rem; border-top: 1px solid var(--line); }
+        .catalog-row { display: grid; grid-template-columns: minmax(0, 1fr) 7rem 7rem auto; align-items: center; gap: 1rem; border-bottom: 1px solid var(--line); padding: 1rem .25rem; transition: background-color .2s ease, padding .35s var(--ease-out); }
+        .catalog-row:last-child { border-bottom: 0; }
+        .catalog-row:hover { background: #f8fafc; padding-inline: .8rem; }
+        .catalog-row.is-inactive { opacity: .68; }
+        .catalog-title { color: var(--ink); font-size: .88rem; font-weight: 900; }
+        .catalog-meta { margin-top: .25rem; color: #64748b; font-size: .72rem; line-height: 1.45; }
+        .catalog-price { color: var(--ink); font-size: .86rem; font-weight: 900; font-variant-numeric: tabular-nums; }
+        .catalog-status { width: max-content; border-radius: 999px; background: #e2e8f0; padding: .35rem .55rem; color: #475569; font-size: .7rem; font-weight: 850; }
+        .catalog-status.is-active { background: #d1fae5; color: #047857; }
+        .catalog-edit { border: 1px solid #cbd5e1; border-radius: 999px; padding: .55rem .75rem; color: #334155; font-size: .72rem; font-weight: 850; }
+        .catalog-edit:hover { border-color: var(--ink); color: var(--ink); }
+        .catalog-empty { padding: 2rem .5rem; text-align: center; }
+        .catalog-empty strong { color: var(--ink); font-size: .88rem; }
+        .catalog-empty p { margin-top: .3rem; color: #64748b; font-size: .76rem; }
+
+        .user-profile-paper { border: 1px solid #dbe3ec; border-radius: 1rem; background: var(--paper); box-shadow: 0 20px 55px rgba(15, 23, 42, .07); }
+        .user-profile-header {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            display: grid;
+            grid-template-columns: auto minmax(0, 1fr) auto;
+            align-items: center;
+            gap: 1rem;
+            border-bottom: 1px solid var(--line);
+            border-radius: 1rem 1rem 0 0;
+            background: rgba(255, 255, 255, .97);
+            padding: 1rem 1.25rem;
+            box-shadow: 0 10px 25px rgba(15, 23, 42, .045);
+        }
+        .user-profile-back { display: inline-flex; min-height: 2.75rem; align-items: center; gap: .55rem; border: 1px solid #cbd5e1; border-radius: 999px; padding: .65rem .85rem; color: #334155; font-size: .76rem; font-weight: 850; }
+        .user-profile-back:hover { border-color: var(--ink); color: var(--ink); }
+        .user-profile-identity { min-width: 0; }
+        .user-profile-identity h1 { overflow: hidden; color: var(--ink); font-size: clamp(1.15rem, 2vw, 1.55rem); font-weight: 900; letter-spacing: -.025em; text-overflow: ellipsis; white-space: nowrap; }
+        .user-profile-identity p { margin-top: .2rem; overflow: hidden; color: #64748b; font-size: .74rem; text-overflow: ellipsis; white-space: nowrap; }
+        .user-profile-actions { display: flex; align-items: center; gap: .55rem; }
+        .user-save-state { display: inline-flex; min-height: 2.5rem; align-items: center; gap: .5rem; border-radius: 999px; background: #f1f5f9; padding: .55rem .75rem; color: #475569; font-size: .72rem; font-weight: 800; }
+        .user-save-state[data-state="saving"] { background: #ecfdf5; color: #047857; }
+        .user-save-state[data-state="error"] { background: #fff1f2; color: #be123c; }
+        .user-save-state button { text-decoration: underline; text-underline-offset: .2rem; }
+        .user-profile-menu { position: relative; }
+        .user-profile-menu > summary { display: grid; width: 2.75rem; height: 2.75rem; cursor: pointer; list-style: none; place-items: center; border: 1px solid #cbd5e1; border-radius: 999px; color: #475569; }
+        .user-profile-menu > summary::-webkit-details-marker { display: none; }
+        .user-profile-menu[open] > summary { border-color: var(--ink); color: var(--ink); }
+        .user-profile-menu-panel { position: absolute; top: calc(100% + .5rem); right: 0; width: 15rem; border: 1px solid #cbd5e1; border-radius: .8rem; background: #fff; padding: .4rem; box-shadow: 0 18px 40px rgba(15, 23, 42, .14); }
+        .user-profile-menu-panel button { display: flex; width: 100%; align-items: center; gap: .65rem; border-radius: .75rem; padding: .75rem; color: #be123c; font-size: .76rem; font-weight: 850; text-align: left; }
+        .user-profile-menu-panel button:hover { background: #fff1f2; }
+        .user-membership-strip { display: flex; flex-wrap: wrap; gap: .45rem; margin-top: .55rem; }
+        .user-membership-chip { border-radius: 999px; padding: .3rem .55rem; background: #f1f5f9; color: #475569; font-size: .72rem; font-weight: 850; }
+        .user-membership-chip.is-active { background: #d1fae5; color: #047857; }
+        .user-membership-chip.is-pending { background: #fef3c7; color: #92400e; }
+        .user-membership-chip.is-disabled { background: #ffe4e6; color: #be123c; }
+
+        .user-profile-section { padding: clamp(1.35rem, 3vw, 2.25rem); }
+        .user-profile-section + .user-profile-section { border-top: 1px solid var(--line); }
+        .user-profile-section-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 1.25rem; margin-bottom: 1.25rem; }
+        .user-profile-section-head h2 { color: var(--ink); font-size: clamp(1.25rem, 2vw, 1.7rem); font-weight: 900; letter-spacing: -.025em; }
+        .user-profile-section-head p { max-width: 68ch; margin-top: .4rem; color: var(--copy); font-size: .8rem; line-height: 1.55; }
+        .user-profile-section-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .55rem; }
+        .user-profile-button { display: inline-flex; min-height: 2.75rem; align-items: center; justify-content: center; gap: .55rem; border: 1px solid #cbd5e1; border-radius: .75rem; padding: .7rem .9rem; color: #334155; font-size: .76rem; font-weight: 850; }
+        .user-profile-button:hover { border-color: var(--ink); color: var(--ink); }
+        .user-profile-button.is-primary { border-color: var(--ink); background: var(--ink); color: #fff; }
+        .user-profile-button.is-primary:hover { background: #1e293b; }
+        .user-profile-button.is-danger { border-color: #fecdd3; color: #be123c; }
+        .user-profile-button:disabled { cursor: not-allowed; opacity: .45; }
+        .prospect-classification .user-profile-section-head { margin-bottom: 0; }
+        .user-profile-field { width: 100%; border: 1px solid #cbd5e1; border-radius: .8rem; background: #f8fafc; padding: .8rem .9rem; color: var(--ink); font-size: .82rem; }
+        .user-profile-field:focus { border-color: var(--ink-soft); background: #fff; outline: none; box-shadow: 0 0 0 3px rgba(16, 185, 129, .2); }
+        .user-profile-field-label { display: block; margin-bottom: .45rem; color: #475569; font-size: .72rem; font-weight: 850; }
+        .user-profile-hint { margin-top: .4rem; color: #64748b; font-size: .72rem; line-height: 1.45; }
+        .user-fact-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1.15fr) minmax(8rem, .7fr); gap: .85rem; margin-bottom: 1.25rem; }
+        .user-check-all-status { margin-bottom: 1.25rem; border-block: 1px solid var(--line); background: var(--wash); padding: 1rem .9rem; color: var(--copy); font-size: .78rem; line-height: 1.55; }
+        .user-check-all-status[hidden] { display: none; }
+        .user-check-all-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+        .user-check-all-title { display: flex; align-items: center; gap: .55rem; color: var(--ink); font-size: .82rem; font-weight: 900; }
+        .user-check-all-copy { margin-top: .35rem; }
+        .user-check-all-actions { display: flex; flex: none; flex-wrap: wrap; gap: .5rem; }
+
+        .user-license-list { border-top: 1px solid var(--line); }
+        .user-license-empty { padding: 2.5rem 1rem; text-align: center; }
+        .user-license-empty strong { color: var(--ink); font-size: .92rem; }
+        .user-license-empty p { max-width: 48ch; margin: .35rem auto 0; color: #64748b; font-size: .8rem; line-height: 1.55; }
+        .user-license { position: relative; border-bottom: 1px solid var(--line); padding: 1.25rem .25rem; }
+        .user-license:last-child { border-bottom: 0; }
+        .user-license::before { position: absolute; inset-block: 0; left: 0; width: 1px; background: var(--license-accent, var(--muted)); content: ""; }
+        .user-license.is-editing::before { background: var(--emerald); }
+        .user-license-summary { display: grid; grid-template-columns: minmax(9rem, .8fr) repeat(3, minmax(7rem, .65fr)) auto; align-items: center; gap: 1rem; padding-inline: .85rem; }
+        .user-license-name { color: var(--ink); font-size: .92rem; font-weight: 900; }
+        .user-license-meta { color: #64748b; font-size: .72rem; line-height: 1.45; }
+        .user-license-value { margin-top: .2rem; overflow-wrap: anywhere; color: var(--ink); font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .76rem; }
+        .user-license-status { display: inline-flex; width: max-content; border-radius: 999px; padding: .35rem .6rem; font-size: .72rem; font-weight: 850; }
+        .user-license-actions { display: flex; justify-content: flex-end; gap: .4rem; }
+        .user-license-actions button { display: grid; width: 2.5rem; height: 2.5rem; place-items: center; border: 1px solid #cbd5e1; border-radius: 999px; color: #475569; }
+        .user-license-actions button:hover { border-color: var(--ink); color: var(--ink); }
+        .user-license-actions button.user-license-check { display: inline-flex; width: auto; min-width: 2.5rem; padding-inline: .75rem; border-radius: .75rem; gap: .45rem; color: var(--ink); font-size: .72rem; font-weight: 850; }
+        .user-license-actions button:disabled { cursor: wait; opacity: .55; }
+        .user-provider-check { margin: 1.15rem .85rem 0; border-top: 1px solid var(--line); padding-top: 1rem; }
+        .user-provider-check[hidden] { display: none; }
+        .user-provider-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+        .user-provider-title { display: flex; align-items: center; gap: .55rem; color: var(--ink); font-size: .82rem; font-weight: 900; }
+        .user-provider-title.is-positive { color: #047857; }
+        .user-provider-title.is-attention { color: #b45309; }
+        .user-provider-title.is-error { color: #be123c; }
+        .user-provider-copy { max-width: 72ch; margin-top: .35rem; color: var(--copy); font-size: .76rem; line-height: 1.55; }
+        .user-provider-time { flex: none; color: #475569; font-size: .72rem; font-weight: 750; }
+        .user-provider-diffs { margin-top: .9rem; border-block: 1px solid var(--line); }
+        .user-provider-diff { display: grid; grid-template-columns: 1.5rem minmax(7rem, .55fr) minmax(0, 1fr) minmax(0, 1fr); gap: .75rem; align-items: start; padding: .85rem .25rem; }
+        .user-provider-diff + .user-provider-diff { border-top: 1px solid var(--line); }
+        .user-provider-diff input { width: 1rem; height: 1rem; margin-top: .15rem; accent-color: var(--emerald); }
+        .user-provider-diff input:focus-visible { outline: 2px solid var(--emerald-focus); outline-offset: 3px; }
+        .user-provider-diff-label { color: var(--ink); font-size: .74rem; font-weight: 850; }
+        .user-provider-diff-note { display: block; margin-top: .25rem; color: #92400e; font-size: .72rem; font-weight: 650; line-height: 1.4; }
+        .user-provider-value-label { display: block; margin-bottom: .25rem; color: #475569; font-size: .72rem; font-weight: 800; }
+        .user-provider-value { overflow-wrap: anywhere; color: var(--ink); font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .73rem; line-height: 1.5; }
+        .user-provider-metadata { display: flex; flex-wrap: wrap; gap: .45rem 1rem; margin-top: .85rem; color: #475569; font-size: .72rem; line-height: 1.5; }
+        .user-provider-metadata strong { color: #475569; }
+        .user-provider-actions { display: flex; flex-wrap: wrap; gap: .55rem; margin-top: .9rem; }
+        .user-license-editor { display: none; margin: 1.1rem .85rem 0; border-top: 1px solid var(--line); padding-top: 1.1rem; }
+        .user-license.is-editing .user-license-editor { display: block; animation: profile-editor-in .35s var(--ease-out) both; }
+        .user-license-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .85rem; }
+        .user-license-grid .is-wide { grid-column: span 2; }
+        .user-license-grid .is-full { grid-column: 1 / -1; }
+        .user-license-validation { min-height: 1.2rem; margin-top: .8rem; color: #be123c; font-size: .72rem; font-weight: 750; }
+        @keyframes profile-editor-in { from { opacity: .35; transform: translateY(-.35rem); } to { opacity: 1; transform: translateY(0); } }
+
+        .user-new-license { margin-top: 1.25rem; scroll-margin-top: 8rem; border-top: 1px solid var(--line); padding-top: 1.25rem; }
+        .user-new-license[hidden] { display: none; }
+        .user-new-license h3 { color: var(--ink); font-size: 1rem; font-weight: 900; }
+        .user-new-license p { margin-top: .3rem; color: #64748b; font-size: .8rem; line-height: 1.5; }
+        .user-new-license-actions { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: 1rem; }
+
+        .user-support-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 1rem; }
+        .user-private-note { border: 1px solid #cbd5e1; border-radius: .8rem; background: #f8fafc; padding: .85rem; }
+        .user-private-note textarea { min-height: 11rem; }
+        .user-timeline { margin-top: 1.5rem; border-top: 1px solid var(--line); }
+        .user-timeline-item { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); gap: 1rem; border-bottom: 1px solid var(--line); padding: 1.15rem .25rem; }
+        .user-timeline-item:last-child { border-bottom: 0; }
+        .user-timeline-date { color: #64748b; font-size: .72rem; font-weight: 800; line-height: 1.5; }
+        .user-timeline-title { color: var(--ink); font-size: .9rem; font-weight: 900; }
+        .user-timeline-copy { margin-top: .35rem; color: #475569; font-size: .8rem; line-height: 1.6; white-space: pre-wrap; }
+        .user-timeline-tags { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .55rem; }
+        .user-timeline-tag { border-radius: 999px; background: #f1f5f9; padding: .28rem .5rem; color: #475569; font-size: .72rem; font-weight: 850; }
+        .user-timeline-tag.is-shared { background: #d1fae5; color: #047857; }
+        .user-timeline-empty { padding: 2rem .5rem; text-align: center; color: #64748b; font-size: .78rem; }
+        .user-event-composer { margin-top: 1rem; scroll-margin-top: 8rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+        .user-event-composer[hidden] { display: none; }
+        .user-event-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .85rem; }
+        .user-event-grid .is-full { grid-column: 1 / -1; }
+
+        .user-account-grid { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 1.5rem; }
+        .user-account-column + .user-account-column { border-left: 1px solid var(--line); padding-left: 1.5rem; }
+        .user-account-column h3 { color: var(--ink); font-size: 1rem; font-weight: 900; }
+        .user-account-column > p { margin-top: .35rem; color: #64748b; font-size: .8rem; line-height: 1.5; }
+        .user-account-fields { display: grid; gap: .85rem; margin-top: 1rem; }
+        .user-access-block { padding-block: 1rem; }
+        .user-access-block + .user-access-block { border-top: 1px solid var(--line); }
+        .user-access-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+        .user-access-toggle { display: inline-flex; align-items: center; gap: .55rem; color: #334155; font-size: .75rem; font-weight: 850; }
+        .user-access-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; margin-top: .85rem; }
+        .user-pool-list { display: grid; gap: .45rem; grid-column: 1 / -1; border-top: 1px solid var(--line); padding-top: .75rem; }
+        .user-pool-option { display: flex; align-items: center; gap: .55rem; color: #475569; font-size: .8rem; }
+        .user-access-actions { display: flex; align-items: center; justify-content: space-between; gap: 1rem; border-top: 1px solid var(--line); margin-top: 1rem; padding-top: 1rem; }
+        .user-access-actions p { max-width: 48ch; color: #64748b; font-size: .8rem; line-height: 1.45; }
+
+        .user-shell-modal { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; overflow-y: auto; background: rgba(2, 6, 23, .62); padding: 1rem; }
+        .user-shell-modal[hidden] { display: none; }
+        .user-shell-dialog { width: min(100%, 31rem); border-radius: 1rem; background: #fff; box-shadow: 0 24px 80px rgba(15, 23, 42, .18); }
+        .user-shell-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; border-bottom: 1px solid var(--line); padding: 1.25rem; }
+        .user-shell-head h2 { color: var(--ink); font-size: 1.3rem; font-weight: 900; letter-spacing: -.025em; }
+        .user-shell-head p { margin-top: .35rem; color: #64748b; font-size: .8rem; line-height: 1.5; }
+        .user-shell-close { display: grid; width: 2.5rem; height: 2.5rem; flex: none; place-items: center; border: 1px solid #cbd5e1; border-radius: 999px; color: #475569; }
+        .user-shell-form { display: grid; gap: 1rem; padding: 1.25rem; }
+        .user-shell-actions { display: flex; justify-content: flex-end; gap: .6rem; }
+
+        .admin-rail-backdrop { display: none; }
+        .admin-workspace table { min-width: 42rem; }
+        .admin-workspace .overflow-hidden { overflow-x: auto; }
+
+        @media (max-width: 1100px) {
+            .admin-shell { display: block; }
+            .admin-room-rail { position: fixed; inset: 0 auto 0 0; width: min(19rem, 86vw); transform: translateX(-105%); transition: transform .42s var(--ease-out); }
+            .admin-room-rail.is-open { transform: translateX(0); }
+            .admin-rail-close { display: inline-grid; width: 2.5rem; height: 2.5rem; place-items: center; border-radius: 999px; }
+            .admin-mobilebar { position: sticky; top: 0; z-index: 30; display: flex; }
+            .admin-rail-backdrop { position: fixed; inset: 0; z-index: 35; display: block; visibility: hidden; background: rgba(2, 6, 23, .58); opacity: 0; transition: opacity .25s ease, visibility .25s ease; }
+            .admin-rail-backdrop.is-open { visibility: visible; opacity: 1; }
+            .admin-header-inner { align-items: flex-start; flex-direction: column; gap: 1.25rem; }
+            .user-profile-header { top: 4rem; }
+        }
+        @media (max-width: 720px) {
+            .admin-header-inner { padding: 1.5rem 1rem 1.25rem; }
+            .admin-canvas { padding: 1rem .75rem 2rem; }
+            .admin-paper-head { align-items: flex-start; flex-direction: column; }
+            .ops-row { grid-template-columns: 1fr; gap: .65rem; }
+            .ops-action { justify-self: start; }
+            .ops-detail { grid-column: 1; }
+            .ops-row.is-open .ops-detail { align-items: flex-start; flex-direction: column; }
+            .catalog-head, .catalog-migration { align-items: stretch; flex-direction: column; }
+            .catalog-head-actions, .catalog-head-actions .catalog-button, .catalog-migration .catalog-button { width: 100%; }
+            .catalog-form-grid { grid-template-columns: 1fr; }
+            .catalog-row { grid-template-columns: minmax(0, 1fr) auto; gap: .7rem; }
+            .catalog-price { grid-row: 1; grid-column: 2; }
+            .catalog-status { grid-column: 1; }
+            .catalog-edit { grid-column: 2; grid-row: 2; }
+            .user-profile-header { grid-template-columns: auto minmax(0, 1fr) auto; padding: .85rem; }
+            .user-new-license, .user-event-composer { scroll-margin-top: 12rem; }
+            .user-profile-back span { display: none; }
+            .user-profile-actions { gap: .35rem; }
+            .user-save-state { min-width: 2.5rem; justify-content: center; padding-inline: .65rem; }
+            .user-save-state > span { display: none; }
+            .user-fact-grid, .user-support-grid, .user-account-grid { grid-template-columns: 1fr; }
+            .user-account-column + .user-account-column { border-top: 1px solid var(--line); border-left: 0; padding-top: 1.5rem; padding-left: 0; }
+            .user-license-summary { grid-template-columns: minmax(0, 1fr) auto; }
+            .user-license-summary > :nth-child(2), .user-license-summary > :nth-child(3), .user-license-summary > :nth-child(4) { grid-column: 1; }
+            .user-license-actions { grid-row: 1 / span 2; grid-column: 2; }
+            .user-license-grid, .user-event-grid { grid-template-columns: 1fr; }
+            .user-license-grid .is-wide, .user-license-grid .is-full, .user-event-grid .is-full { grid-column: 1; }
+            .user-profile-section-head { align-items: flex-start; flex-direction: column; }
+            .user-profile-section-actions { width: 100%; }
+            .user-profile-section-head .user-profile-button { flex: 1 1 12rem; }
+            .user-check-all-head, .user-provider-head { align-items: stretch; flex-direction: column; }
+            .user-check-all-actions { width: 100%; }
+            .user-check-all-actions .user-profile-button { flex: 1 1 10rem; }
+            .user-provider-diff { grid-template-columns: 1.5rem minmax(0, 1fr); gap: .55rem .7rem; }
+            .user-provider-diff > :nth-child(3), .user-provider-diff > :nth-child(4) { grid-column: 2; }
+            .user-provider-time { align-self: flex-start; }
+            .user-provider-actions .user-profile-button { flex: 1 1 10rem; }
+            .user-timeline-item { grid-template-columns: 1fr; gap: .35rem; }
+            .user-access-fields { grid-template-columns: 1fr; }
+            .user-access-actions { align-items: stretch; flex-direction: column; }
+            .user-access-actions .user-profile-button { width: 100%; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-slate-100 text-slate-900 antialiased">
+    <div id="toast" class="fixed right-4 top-4 z-50 translate-x-full opacity-0 transition-all duration-300">
+        <div class="flex items-center gap-3 rounded-2xl bg-slate-950 px-5 py-3 text-white shadow-float">
+            <i id="toast-icon" class="fa-solid fa-circle-check"></i>
+            <span id="toast-msg">Saved</span>
+        </div>
+    </div>
+
+    <div class="admin-shell">
+        <aside class="admin-room-rail" id="admin-room-rail" aria-label="Clubhouse rooms">
+            <div class="admin-rail-inner">
+                <div class="admin-brand">
+                    <span class="admin-brand-mark">E</span>
+                    <div>
+                        <div class="admin-brand-name">Elliot's clubhouse</div>
+                        <div class="admin-brand-subtitle">Operator workspace</div>
+                    </div>
+                    <button type="button" class="admin-rail-close" id="admin-rail-close" aria-label="Close room menu"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+                </div>
+                <nav class="admin-nav" aria-label="Portal rooms">
+                    <a class="admin-nav-item" href="./index.html#/apps"><i class="fa-solid fa-house" aria-hidden="true"></i><span>Home</span></a>
+                    <a class="admin-nav-item" href="./index.html#/app/strong8k"><i class="fa-solid fa-tv" aria-hidden="true"></i><span>Strong8K</span></a>
+                    <a class="admin-nav-item" href="mailto:info@goelliot.vip"><i class="fa-solid fa-life-ring" aria-hidden="true"></i><span>Support</span></a>
+                    <div class="admin-nav-label">For Elliot</div>
+                    <a class="admin-nav-item is-active" href="./admin.html" aria-current="page"><i class="fa-solid fa-list-check" aria-hidden="true"></i><span>Operations</span></a>
+                </nav>
+                <div class="admin-account">
+                    <div class="admin-account-name">Operator account</div>
+                    <div id="admin-email-rail" class="admin-account-email"></div>
+                    <button id="admin-signout-btn" type="button" class="admin-signout"><i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>Sign out</button>
+                </div>
+            </div>
+        </aside>
+        <div id="admin-rail-backdrop" class="admin-rail-backdrop"></div>
+        <div class="admin-workspace">
+            <div class="admin-mobilebar">
+                <button id="admin-rail-open" type="button" aria-expanded="false"><i class="fa-solid fa-bars" aria-hidden="true"></i>Rooms</button>
+                <span>Operations</span>
+            </div>
+            <header id="admin-page-header" class="admin-header">
+                <div class="admin-header-inner">
+                    <div>
+                        <h1>Operations</h1>
+                        <p>Start with the people and subscriptions that need attention, then move into configuration when the queue is clear.</p>
+                        <p class="!mt-2 text-xs">Signed in as <span id="admin-email" class="font-bold text-slate-700"></span></p>
+                    </div>
+                    <div class="admin-header-actions">
+                        <a href="./index.html#/apps" class="rounded-full border border-slate-300 px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:border-slate-900 hover:text-slate-950">Open customer portal</a>
+                    </div>
+                </div>
+            </header>
+
+    <main class="admin-canvas space-y-6">
+        <section id="admin-access-state" class="hidden rounded-[1.75rem] border border-amber-200 bg-amber-50 p-6 shadow-sm">
+            <p class="text-xs font-bold uppercase tracking-[0.3em] text-amber-500">Admin Access</p>
+            <h2 id="admin-access-title" class="mt-2 text-2xl font-black text-slate-950">Checking access…</h2>
+            <p id="admin-access-message" class="mt-3 max-w-3xl text-sm leading-6 text-slate-600"></p>
+            <p id="admin-access-detail" class="mt-3 text-xs font-medium uppercase tracking-[0.18em] text-slate-400"></p>
+            <div class="mt-5 flex flex-wrap gap-3">
+                <a href="./index.html" class="rounded-full bg-slate-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-slate-800">Open Portal</a>
+                <button type="button" onclick="window.location.reload()" class="rounded-full border border-slate-200 px-5 py-3 text-sm font-bold text-slate-700 transition hover:border-slate-900 hover:text-slate-950">Retry</button>
+            </div>
+        </section>
+
+        <section id="user-workspace" class="hidden" aria-labelledby="user-workspace-title">
+            <div class="user-profile-paper">
+                <header class="user-profile-header">
+                    <button type="button" id="user-workspace-back" class="user-profile-back">
+                        <i class="fa-solid fa-arrow-left" aria-hidden="true"></i><span>People</span>
+                    </button>
+                    <div class="user-profile-identity">
+                        <h1 id="user-workspace-title">Customer profile</h1>
+                        <p id="user-workspace-email"></p>
+                        <div id="user-membership-strip" class="user-membership-strip" aria-label="Membership status"></div>
+                    </div>
+                    <div class="user-profile-actions">
+                        <div id="user-autosave-status" class="user-save-state" data-state="saved" aria-live="polite">
+                            <i id="user-autosave-icon" class="fa-solid fa-circle-check" aria-hidden="true"></i>
+                            <span id="user-autosave-label">Saved</span>
+                            <button type="button" id="user-autosave-retry" class="hidden">Retry</button>
+                        </div>
+                        <details class="user-profile-menu">
+                            <summary aria-label="Profile actions"><i class="fa-solid fa-ellipsis" aria-hidden="true"></i></summary>
+                            <div class="user-profile-menu-panel">
+                                <button type="button" id="archive-user-btn"><i class="fa-solid fa-box-archive" aria-hidden="true"></i>Archive profile</button>
+                            </div>
+                        </details>
+                    </div>
+                </header>
+
+                <section class="user-profile-section prospect-classification" aria-label="Admin-only prospect classification">
+                    <div class="user-profile-section-head">
+                        <div>
+                            <span id="user-prospect-label" class="user-membership-chip" aria-live="polite">License history unknown</span>
+                            <p>Admin-only label. No access, purchase, or message is triggered by classification.</p>
+                        </div>
+                        <div class="user-profile-section-actions">
+                            <button type="button" id="user-prospect-classify" class="user-profile-button" hidden>Confirm Prospect label</button>
+                            <button type="button" id="user-prospect-start" class="user-profile-button" hidden>Start conversation</button>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="user-profile-section" aria-labelledby="user-licenses-title">
+                    <div class="user-profile-section-head">
+                        <div>
+                            <h2 id="user-licenses-title">Strong8K licenses</h2>
+                            <p>Check saved licenses against Strong8K, review every difference, and choose exactly what changes before anything is updated.</p>
+                        </div>
+                        <div class="user-profile-section-actions">
+                            <button type="button" id="check-all-licenses-btn" class="user-profile-button"><i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i>Check all licenses</button>
+                            <button type="button" id="add-license-btn" class="user-profile-button"><i class="fa-solid fa-plus" aria-hidden="true"></i>Add license</button>
+                        </div>
+                    </div>
+
+                    <div class="user-fact-grid">
+                        <label>
+                            <span class="user-profile-field-label">Primary domain</span>
+                            <input id="strong8k-domain" type="text" class="user-profile-field" placeholder="Provider domain" data-profile-field="domain_8k">
+                        </label>
+                        <label>
+                            <span class="user-profile-field-label">Backup domain</span>
+                            <input id="strong8k-backup-domain" type="text" class="user-profile-field" placeholder="Backup provider domain" data-profile-field="domain_8k_backup">
+                        </label>
+                        <label>
+                            <span class="user-profile-field-label">Credits allocated</span>
+                            <input id="strong8k-credits" type="number" min="0" class="user-profile-field" data-profile-field="credits_allocated">
+                        </label>
+                    </div>
+
+                    <div id="strong8k-check-all-status" class="user-check-all-status" aria-live="polite" hidden></div>
+                    <div id="user-license-list" class="user-license-list"></div>
+
+                    <form id="new-license-form" class="user-new-license" hidden>
+                        <h3>Add a Strong8K license</h3>
+                        <p>Username, license password, and expiry are required before this line is created.</p>
+                        <div class="user-license-grid mt-4">
+                            <label><span class="user-profile-field-label">Label</span><input id="new-license-label" type="text" class="user-profile-field" placeholder="Living room"></label>
+                            <label><span class="user-profile-field-label">Status</span><select id="new-license-status" class="user-profile-field"><option value="Active">Active</option><option value="Disabled">Disabled</option><option value="Trial">Trial</option><option value="Expired">Expired</option><option value="Banned">Banned</option></select></label>
+                            <label><span class="user-profile-field-label">Expiry</span><input id="new-license-expiry" type="date" class="user-profile-field" required></label>
+                            <label><span class="user-profile-field-label">Username</span><input id="new-license-username" type="text" class="user-profile-field" required></label>
+                            <label><span class="user-profile-field-label">License password</span><input id="new-license-password" type="text" class="user-profile-field" required></label>
+                            <label><span class="user-profile-field-label">Credits</span><input id="new-license-credits" type="number" min="0" class="user-profile-field" value="0"></label>
+                            <label><span class="user-profile-field-label">Package</span><input id="new-license-package" type="text" class="user-profile-field"></label>
+                            <label><span class="user-profile-field-label">Price paid</span><input id="new-license-price" type="text" class="user-profile-field"></label>
+                            <label><span class="user-profile-field-label">Date paid</span><input id="new-license-date-paid" type="date" class="user-profile-field"></label>
+                            <label class="is-wide"><span class="user-profile-field-label">M3U URL</span><input id="new-license-m3u" type="url" class="user-profile-field"></label>
+                            <label><span class="user-profile-field-label">EPG URL</span><input id="new-license-epg" type="url" class="user-profile-field"></label>
+                            <label><span class="user-profile-field-label">EPGenius key</span><input id="new-license-epgenius-key" type="text" class="user-profile-field"></label>
+                            <label class="is-wide"><span class="user-profile-field-label">EPGenius URL</span><input id="new-license-epgenius-url" type="url" class="user-profile-field"></label>
+                        </div>
+                        <p id="new-license-error" class="user-license-validation" role="alert"></p>
+                        <div class="user-new-license-actions">
+                            <button type="submit" class="user-profile-button is-primary">Create license</button>
+                            <button type="button" id="new-license-cancel" class="user-profile-button">Cancel</button>
+                        </div>
+                    </form>
+                </section>
+
+                <section class="user-profile-section" aria-labelledby="user-support-title">
+                    <div class="user-profile-section-head">
+                        <div>
+                            <h2 id="user-support-title">Setup and support record</h2>
+                            <p>Keep the current setup concise, preserve private working notes, and add dated interactions without rewriting history.</p>
+                        </div>
+                        <button type="button" id="support-event-add-btn" class="user-profile-button"><i class="fa-solid fa-plus" aria-hidden="true"></i>Add interaction</button>
+                    </div>
+
+                    <div class="user-support-grid">
+                        <label>
+                            <span class="user-profile-field-label">Shared setup summary</span>
+                            <textarea id="strong8k-setup-notes" rows="9" class="user-profile-field leading-6" placeholder="Devices, apps, setup decisions, and current troubleshooting context." data-profile-field="setup_notes"></textarea>
+                            <span class="user-profile-hint">The customer can read and update this summary in their portal.</span>
+                        </label>
+                        <label class="user-private-note">
+                            <span class="user-profile-field-label"><i class="fa-solid fa-lock mr-1" aria-hidden="true"></i>Private admin notes</span>
+                            <textarea id="strong8k-internal-notes" rows="9" class="user-profile-field leading-6" placeholder="Interpretation, follow-up, or context that should stay private." data-private-field="internal_notes"></textarea>
+                            <span class="user-profile-hint">Stored separately from the customer-readable Strong8K profile.</span>
+                        </label>
+                    </div>
+
+                    <div class="mt-5 grid gap-4 md:grid-cols-3">
+                        <label><span class="user-profile-field-label">Live TV preferences</span><textarea id="strong8k-live" rows="4" class="user-profile-field" data-profile-field="live_preferences"></textarea></label>
+                        <label><span class="user-profile-field-label">Movies and series</span><textarea id="strong8k-vod" rows="4" class="user-profile-field" data-profile-field="vod_preferences"></textarea></label>
+                        <label><span class="user-profile-field-label">Customer request</span><textarea id="strong8k-custom-request" rows="4" class="user-profile-field" data-profile-field="custom_request"></textarea></label>
+                    </div>
+
+                    <form id="support-event-form" class="user-event-composer" hidden>
+                        <div class="user-event-grid">
+                            <label><span class="user-profile-field-label">When</span><input id="support-event-occurred" type="datetime-local" class="user-profile-field" required></label>
+                            <label><span class="user-profile-field-label">Kind</span><select id="support-event-kind" class="user-profile-field"><option value="setup">Setup</option><option value="troubleshooting">Troubleshooting</option><option value="renewal">Renewal</option><option value="communication">Communication</option><option value="other">Other</option></select></label>
+                            <label><span class="user-profile-field-label">Visibility</span><select id="support-event-visibility" class="user-profile-field"><option value="internal">Internal</option><option value="shared">Shared with customer</option></select></label>
+                            <label class="is-full"><span class="user-profile-field-label">Summary</span><input id="support-event-summary" type="text" class="user-profile-field" maxlength="180" required placeholder="What happened and what comes next"></label>
+                            <label class="is-full"><span class="user-profile-field-label">Details</span><textarea id="support-event-details" rows="4" class="user-profile-field" placeholder="Useful context, decisions, and follow-up."></textarea></label>
+                            <label class="is-full"><span class="user-profile-field-label">Source text or transcript</span><textarea id="support-event-source" rows="5" class="user-profile-field" placeholder="Optional raw notes kept for future consolidation."></textarea><span class="user-profile-hint">Raw source text is never shown in the customer portal.</span></label>
+                        </div>
+                        <p id="support-event-error" class="user-license-validation" role="alert"></p>
+                        <div class="user-new-license-actions">
+                            <button type="submit" class="user-profile-button is-primary">Add interaction</button>
+                            <button type="button" id="support-event-cancel" class="user-profile-button">Cancel</button>
+                        </div>
+                    </form>
+
+                    <div id="user-support-timeline" class="user-timeline" aria-live="polite"></div>
+                </section>
+
+                <section class="user-profile-section" aria-labelledby="user-account-title">
+                    <div class="user-profile-section-head">
+                        <div>
+                            <h2 id="user-account-title">Identity and access</h2>
+                            <p>Identity fields save automatically. App access, roles, status, and pool assignments only change after an explicit review.</p>
+                        </div>
+                    </div>
+
+                    <div class="user-account-grid">
+                        <div class="user-account-column">
+                            <h3>Clubhouse identity</h3>
+                            <p>This does not expose or change the customer’s Firebase account password.</p>
+                            <div class="user-account-fields">
+                                <input type="hidden" id="user-id">
+                                <label><span class="user-profile-field-label">Full name</span><input id="user-full-name" type="text" class="user-profile-field" data-user-field="full_name"></label>
+                                <label><span class="user-profile-field-label">Email</span><input id="user-email" type="email" class="user-profile-field" required data-user-field="email"></label>
+                                <label><span class="user-profile-field-label">Default room</span><select id="user-default-app" class="user-profile-field" data-user-field="default_app_id"><option value="">Choose automatically</option><option value="strong8k">Strong8K</option></select></label>
+                            </div>
+                        </div>
+
+                        <div class="user-account-column">
+                            <h3>App access</h3>
+                            <p>Review the complete change before applying it across memberships.</p>
+
+                            <div class="user-access-block">
+                                <div class="user-access-head">
+                                    <strong class="text-sm text-slate-950">Strong8K</strong>
+                                    <label class="user-access-toggle"><input id="member-strong8k-enabled" type="checkbox">Enabled</label>
+                                </div>
+                                <div id="strong8k-membership-panel" class="user-access-fields">
+                                    <label><span class="user-profile-field-label">Role</span><select id="member-strong8k-role" class="user-profile-field"><option value="member">Member</option><option value="admin">Admin</option></select></label>
+                                    <label><span class="user-profile-field-label">Status</span><select id="member-strong8k-status" class="user-profile-field"><option value="active">Active</option><option value="pending">Pending</option><option value="disabled">Disabled</option></select></label>
+                                </div>
+                            </div>
+
+                            <div class="user-access-actions">
+                                <p id="user-access-summary">No access changes waiting.</p>
+                                <button type="button" id="user-access-apply" class="user-profile-button is-primary" disabled>Review and apply</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </section>
+
+        <section id="communications-workspace" class="comm-workspace hidden" aria-label="Customer conversation"></section>
+
+        <section class="admin-tabs" role="tablist" aria-label="Operations workspaces" data-admin-dashboard>
+            <button id="admin-tab-platform" type="button" role="tab" aria-controls="admin-panel-platform" aria-selected="true" data-tab="platform" class="is-active">Action inbox</button>
+            <button id="admin-tab-strong8k" type="button" role="tab" aria-controls="admin-panel-strong8k" aria-selected="false" data-tab="strong8k">Strong8K tools</button>
+        </section>
+
+        <section id="admin-panel-platform" role="tabpanel" aria-labelledby="admin-tab-platform" data-panel="platform" data-admin-dashboard class="space-y-6">
+            <section class="admin-paper" aria-labelledby="operations-inbox-title">
+                <div class="admin-paper-head">
+                    <div>
+                        <h2 id="operations-inbox-title">Needs attention</h2>
+                        <p>Profile-derived items are live. Payment and automation stay visibly empty until their verified sources are connected and tested.</p>
+                    </div>
+                    <span id="operations-inbox-summary" class="text-xs font-bold text-slate-500">Loading queue…</span>
+                </div>
+                <div class="ops-filter-bar" role="group" aria-label="Filter action inbox">
+                    <button type="button" class="ops-filter is-active" data-ops-filter="all">All <span class="ops-filter-count" data-ops-count="all">0</span></button>
+                    <button type="button" class="ops-filter" data-ops-filter="renewal">Renewals <span class="ops-filter-count" data-ops-count="renewal">0</span></button>
+                    <button type="button" class="ops-filter" data-ops-filter="expiry">Expiring <span class="ops-filter-count" data-ops-count="expiry">0</span></button>
+                    <button type="button" class="ops-filter" data-ops-filter="review">Manual review <span class="ops-filter-count" data-ops-count="review">0</span></button>
+                    <button type="button" class="ops-filter" data-ops-filter="prospect">Prospects <span class="ops-filter-count" data-ops-count="prospect">0</span></button>
+                    <button type="button" class="ops-filter" data-ops-filter="support">Support <span class="ops-filter-count" data-ops-count="support">0</span></button>
+                    <button id="communications-filter" type="button" class="ops-filter" data-ops-filter="message" data-communication-enabled hidden>Messages <span class="ops-filter-count" data-ops-count="message">0</span></button>
+                    <button type="button" class="ops-filter" data-ops-filter="payment">Payments <span class="ops-filter-count" data-ops-count="payment">0</span></button>
+                    <button type="button" class="ops-filter" data-ops-filter="automation">Automation <span class="ops-filter-count" data-ops-count="automation">0</span></button>
+                </div>
+                <div id="operations-inbox-list"></div>
+                <p class="border-t border-slate-100 px-5 py-3 text-xs leading-5 text-slate-500">Source status: customer-reported Strong8K renewal requests are connected. Automation failures remain empty until a renewal-processing workflow writes a verified review state.</p>
+            </section>
+
+            <section id="communications-directory" class="admin-paper" aria-labelledby="communications-directory-title" data-communication-enabled hidden>
+                <div class="admin-paper-head"><div><h2 id="communications-directory-title">Conversations <span id="communication-unread-count" class="comm-state">0</span></h2><p>Customer messages and email replies, together. Showing the latest 100 conversations.</p></div>
+                    <label class="comm-status-label" for="communication-list-filter">Show<select id="communication-list-filter" class="user-profile-field"><option value="active">Active conversations</option><option value="resolved">Resolved</option><option value="all">All conversations</option></select></label>
+                </div><div id="communication-directory-list" aria-live="polite"></div>
+            </section>
+
+            <div class="admin-paper">
+                <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                    <div class="p-6 pb-0">
+                        <h2 class="text-2xl font-black tracking-[-0.025em] text-slate-950">People and access</h2>
+                        <p class="mt-2 text-sm text-slate-500">Search profiles, memberships, licenses, and shared setup history.</p>
+                    </div>
+                    <div class="flex flex-wrap gap-3 px-6 pt-6 lg:pl-0">
+                        <input id="user-search" type="text" placeholder="Search name or email" class="rounded-full border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-slate-900">
+                        <label class="text-sm text-slate-600" for="people-filter">Show
+                            <select id="people-filter" class="user-profile-field"><option value="all">All people</option><option value="prospects">Prospects</option></select>
+                        </label>
+                        <button id="merge-profiles-btn" type="button" class="rounded-full border border-slate-200 px-5 py-3 text-sm font-bold text-slate-700 transition hover:border-slate-900 hover:text-slate-950">Merge Profiles</button>
+                        <button id="new-user-btn" class="rounded-full bg-slate-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-slate-800">+ New User</button>
+                    </div>
+                </div>
+                <div class="mt-6 overflow-hidden border-t border-slate-100">
+                    <table id="people-table" class="w-full text-left">
+                        <thead class="bg-slate-50 text-[11px] uppercase tracking-[0.22em] text-slate-400">
+                            <tr>
+                                <th class="px-4 py-3">User</th>
+                                <th class="px-4 py-3">Memberships</th>
+                                <th class="px-4 py-3">Default App</th>
+                                <th class="px-4 py-3 text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="admin-panel-strong8k" role="tabpanel" aria-labelledby="admin-tab-strong8k" data-panel="strong8k" data-admin-dashboard class="hidden space-y-6">
+            <div class="admin-paper">
+                <form id="strong8k-config-form" class="catalog-section">
+                    <div class="catalog-head">
+                        <div>
+                            <h2>Content options</h2>
+                            <p>Maintain the category choices customers can add to their shared setup preferences.</p>
+                        </div>
+                    </div>
+                    <div class="mt-6 grid gap-5 md:grid-cols-2">
+                        <label class="block">
+                            <span class="mb-2 block text-xs font-bold uppercase tracking-[0.22em] text-slate-400">Live Categories</span>
+                            <textarea id="strong8k-live-list" rows="8" class="w-full rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4 text-sm outline-none transition focus:border-slate-900"></textarea>
+                        </label>
+                        <label class="block">
+                            <span class="mb-2 block text-xs font-bold uppercase tracking-[0.22em] text-slate-400">VOD Categories</span>
+                            <textarea id="strong8k-vod-list" rows="8" class="w-full rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4 text-sm outline-none transition focus:border-slate-900"></textarea>
+                        </label>
+                    </div>
+                    <div class="mt-6 flex flex-wrap gap-3">
+                        <button type="submit" class="rounded-full bg-slate-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-slate-800">Save Config</button>
+                        <button type="button" id="seed-strong8k-btn" class="rounded-full border border-slate-200 px-5 py-3 text-sm font-bold text-slate-700 transition hover:border-slate-900 hover:text-slate-950">Seed Defaults</button>
+                    </div>
+                </form>
+
+                <section class="catalog-section" aria-labelledby="packages-admin-title">
+                    <div class="catalog-head">
+                        <div>
+                            <h2 id="packages-admin-title">Packages and credits</h2>
+                            <p>Set the customer price and renewal duration once. Credits always match the number of months.</p>
+                        </div>
+                        <div class="catalog-head-actions">
+                            <button id="new-product-btn" type="button" class="catalog-button is-primary"><i class="fa-solid fa-plus" aria-hidden="true"></i>New package</button>
+                        </div>
+                    </div>
+
+                    <div id="product-migration-notice" class="catalog-migration" hidden>
+                        <div><strong>Legacy packages need import</strong><p id="product-migration-copy"></p></div>
+                        <button id="product-migration-btn" type="button" class="catalog-button">Import missing packages</button>
+                    </div>
+
+                    <form id="product-form" class="catalog-composer" hidden>
+                        <input type="hidden" id="product-id">
+                        <div class="catalog-composer-head"><h3 id="product-form-title">New renewal package</h3></div>
+                        <div class="catalog-form-grid">
+                            <label class="catalog-field"><span>Customer-facing name</span><input id="product-name" type="text" placeholder="1 Year VIP" required></label>
+                            <label class="catalog-field"><span>Customer price</span><input id="product-price" type="number" min="0" step="0.01" placeholder="70.00" required></label>
+                            <label class="catalog-field"><span>Renewal duration</span><select id="product-duration" required><option value="">Choose…</option><option value="1">1 month</option><option value="3">3 months</option><option value="6">6 months</option><option value="12">12 months</option></select></label>
+                            <label class="catalog-field"><span>Credits used</span><input id="product-credits" type="number" value="0" readonly aria-describedby="product-credit-hint"><small id="product-credit-hint" class="mt-1 block text-[11px] leading-4 text-slate-500">Linked to duration.</small></label>
+                        </div>
+                        <label class="catalog-toggle"><input id="product-active" type="checkbox" checked>Available in the customer portal</label>
+                        <div class="catalog-composer-actions">
+                            <button id="product-cancel-btn" type="button" class="catalog-button">Cancel</button>
+                            <button id="product-save-btn" type="submit" class="catalog-button is-primary">Save package</button>
+                        </div>
+                    </form>
+
+                    <div id="product-table-body" class="catalog-list" aria-live="polite"></div>
+                </section>
+            </div>
+            <section class="rounded-[1.75rem] bg-white p-6 shadow-sm">
+                <h2 class="text-2xl font-black text-slate-950">Private notes migration</h2>
+                <p class="mt-3 max-w-3xl text-sm leading-6 text-slate-500">Move legacy internal notes out of customer-readable Strong8K profiles. The migration writes and verifies the private copy before removing the old field, and it is safe to retry.</p>
+                <div class="mt-5 flex flex-wrap items-center gap-3">
+                    <button type="button" id="private-notes-migration-btn" class="rounded-full border border-slate-200 px-5 py-3 text-sm font-bold text-slate-700 transition hover:border-slate-900 hover:text-slate-950">Check and migrate notes</button>
+                    <span id="private-notes-migration-result" class="text-sm text-slate-500">Not checked yet.</span>
+                </div>
+            </section>
+        </section></main>
+        </div>
+    </div>
+
+    <div id="new-user-modal" class="user-shell-modal" hidden>
+        <div class="user-shell-dialog" role="dialog" aria-modal="true" aria-labelledby="new-user-title">
+            <div class="user-shell-head">
+                <div>
+                    <h2 id="new-user-title">Create a customer profile</h2>
+                    <p>Start with the identity only. Licenses and access can be added from the full workspace, and later registration will claim this profile by email.</p>
+                </div>
+                <button type="button" id="new-user-close" class="user-shell-close" aria-label="Close new customer form"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+            </div>
+            <form id="new-user-form" class="user-shell-form">
+                <label><span class="user-profile-field-label">Full name</span><input id="new-user-name" type="text" class="user-profile-field" autocomplete="name" required></label>
+                <label><span class="user-profile-field-label">Email</span><input id="new-user-email" type="email" class="user-profile-field" autocomplete="email" required></label>
+                <p id="new-user-error" class="user-license-validation" role="alert"></p>
+                <div class="user-shell-actions">
+                    <button type="button" id="new-user-cancel" class="user-profile-button">Cancel</button>
+                    <button type="submit" id="new-user-submit" class="user-profile-button is-primary">Create profile</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="merge-modal" class="fixed inset-0 z-40 hidden flex items-start justify-center overflow-y-auto bg-slate-950/60 p-4 py-10">
+        <div class="w-full max-w-3xl rounded-[2rem] bg-white shadow-float">
+            <div class="flex items-start justify-between gap-4 border-b border-slate-100 px-6 py-5">
+                <div>
+                    <p class="text-xs font-bold uppercase tracking-[0.3em] text-amber-500">Destructive — irreversible</p>
+                    <h2 class="mt-2 text-2xl font-black text-slate-950">Merge profiles</h2>
+                    <p class="mt-1 text-sm text-slate-500">Copies Strong8K data from the source into the target. The source account will be archived.</p>
+                </div>
+                <button id="merge-modal-close" type="button" class="rounded-full border border-slate-200 px-4 py-2 text-xs font-bold text-slate-700 transition hover:border-slate-900 hover:text-slate-950">Close</button>
+            </div>
+            <div class="space-y-6 px-6 py-6">
+                <div class="grid gap-4 md:grid-cols-2">
+                    <div>
+                        <p class="mb-2 text-xs font-bold uppercase tracking-[0.22em] text-slate-400">Source — old / fake-email profile</p>
+                        <select id="merge-source-select" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-slate-900">
+                            <option value="">Select source user…</option>
+                        </select>
+                    </div>
+                    <div>
+                        <p class="mb-2 text-xs font-bold uppercase tracking-[0.22em] text-slate-400">Target — real-email profile</p>
+                        <select id="merge-target-select" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-slate-900">
+                            <option value="">Select target user…</option>
+                        </select>
+                    </div>
+                </div>
+                <button id="merge-preview-btn" type="button" class="rounded-full border border-slate-200 px-5 py-3 text-sm font-bold text-slate-700 transition hover:border-slate-900 hover:text-slate-950">Preview Merge</button>
+                <div id="merge-preview-area" class="hidden space-y-3 rounded-[1.5rem] border border-slate-100 bg-slate-50 p-5">
+                    <p class="text-xs font-bold uppercase tracking-[0.22em] text-slate-400">What will be merged into target</p>
+                    <div id="merge-preview-content" class="space-y-2 text-sm text-slate-700"></div>
+                </div>
+                <div id="merge-conflict-area" class="hidden space-y-4"></div>
+                <div id="merge-action-row" class="hidden flex flex-wrap gap-3 border-t border-slate-100 pt-5">
+                    <button id="merge-execute-btn" type="button" class="rounded-full bg-rose-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-rose-700">Merge and Archive Source</button>
+                    <button id="merge-reset-btn" type="button" class="rounded-full border border-slate-200 px-5 py-3 text-sm font-bold text-slate-700 transition hover:border-slate-900 hover:text-slate-950">Reset</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="./admin-app.js?v=20261104-conversations"></script>
+</body>
+</html>

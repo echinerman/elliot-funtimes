@@ -1,0 +1,14 @@
+tunnel: 737edf2c-d100-40c7-a588-63e0bbc95e27
+credentials-file: /root/.cloudflared/737edf2c-d100-40c7-a588-63e0bbc95e27.json
+
+ingress:
+  - hostname: automation.goelliot.vip
+    path: ^/webhook/strong8k-device-info$
+    service: http://127.0.0.1:5678
+  - hostname: automation.goelliot.vip
+    path: ^/webhook/strong8k-renewal-request$
+    service: http://127.0.0.1:5678
+  - hostname: automation.goelliot.vip
+    path: ^/webhook/portal-support-message$
+    service: http://127.0.0.1:5678
+  - service: http_status:404

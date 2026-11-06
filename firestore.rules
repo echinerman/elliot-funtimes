@@ -1,0 +1,190 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isConfiguredAdminEmail() {
+      return isSignedIn()
+        && request.auth.token.email != null
+        && request.auth.token.email == 'e.chinerman@gmail.com';
+    }
+
+    function isPlatformAdmin() {
+      return isConfiguredAdminEmail() || (
+        isSignedIn()
+        && exists(/databases/$(database)/documents/roles/$(request.auth.uid))
+        && get(/databases/$(database)/documents/roles/$(request.auth.uid)).data.platform_admin == true
+      );
+    }
+
+    function linkedAccountId() {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/account_links/$(request.auth.uid))
+        ? get(/databases/$(database)/documents/account_links/$(request.auth.uid)).data.account_id
+        : request.auth.uid;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && (request.auth.uid == userId || linkedAccountId() == userId);
+    }
+
+    function emailMatchesAccount(userId) {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/users/$(userId))
+        && get(/databases/$(database)/documents/users/$(userId)).data.email == request.auth.token.email;
+    }
+
+    function canAccessOwnAccount(userId) {
+      return isOwner(userId) || emailMatchesAccount(userId);
+    }
+
+    function hasAppMembership(userId, appId) {
+      return exists(/databases/$(database)/documents/users/$(userId)/memberships/$(appId))
+        && get(/databases/$(database)/documents/users/$(userId)/memberships/$(appId)).data.status == 'active';
+    }
+
+    function currentUserHasApp(appId) {
+      return isSignedIn() && hasAppMembership(appId == 'strong8k' ? linkedAccountId() : request.auth.uid, appId);
+    }
+
+    function canAccessStrong8kProfile(userId) {
+      return canAccessOwnAccount(userId)
+        && (currentUserHasApp('strong8k') || hasAppMembership(userId, 'strong8k'));
+    }
+
+    function validCustomerProfileCreate() {
+      return request.resource.data.keys().hasOnly([
+        'live_preferences',
+        'vod_preferences',
+        'custom_request',
+        'setup_notes',
+        'devices',
+        'updated_at'
+      ]);
+    }
+
+    function validCustomerProfileUpdate() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+        'live_preferences',
+        'vod_preferences',
+        'custom_request',
+        'setup_notes',
+        'devices',
+        'updated_at'
+      ]);
+    }
+
+    function validSelfMembership(appId) {
+      return request.resource.data.app_id == appId
+        && request.resource.data.role == 'member'
+        && (request.resource.data.status == 'active' || request.resource.data.status == 'pending')
+        && (appId == 'strong8k' && request.resource.data.invite_code_used == 'FAMILY8K');
+    }
+
+    match /account_links/{authUid} {
+      allow read: if isPlatformAdmin() || (isSignedIn() && request.auth.uid == authUid);
+      allow create: if isSignedIn()
+        && request.auth.uid == authUid
+        && request.resource.data.keys().hasOnly(['account_id', 'email', 'created_at'])
+        && request.resource.data.email == request.auth.token.email
+        && exists(/databases/$(database)/documents/users/$(request.resource.data.account_id))
+        && get(/databases/$(database)/documents/users/$(request.resource.data.account_id)).data.email == request.auth.token.email;
+      allow update, delete: if isPlatformAdmin();
+    }
+
+    match /roles/{userId} {
+      allow read: if isPlatformAdmin() || isOwner(userId);
+      allow write: if isPlatformAdmin();
+    }
+
+    match /users/{userId} {
+      allow create: if isPlatformAdmin() || isOwner(userId);
+      allow read: if isPlatformAdmin() || canAccessOwnAccount(userId);
+      allow update: if isPlatformAdmin()
+        || (canAccessOwnAccount(userId) && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'email',
+          'full_name',
+          'default_app_id'
+        ]));
+      allow delete: if isPlatformAdmin();
+
+      match /memberships/{appId} {
+        allow read: if isPlatformAdmin() || canAccessOwnAccount(userId);
+        allow create: if isPlatformAdmin() || (canAccessOwnAccount(userId) && validSelfMembership(appId));
+        allow update: if isPlatformAdmin();
+        allow delete: if isPlatformAdmin();
+      }
+    }
+
+    match /strong8k_profiles/{userId} {
+      allow read: if isPlatformAdmin() || canAccessStrong8kProfile(userId);
+      allow create: if isPlatformAdmin() || (canAccessStrong8kProfile(userId) && validCustomerProfileCreate());
+      allow update: if isPlatformAdmin() || (canAccessStrong8kProfile(userId) && validCustomerProfileUpdate());
+      allow delete: if isPlatformAdmin();
+    }
+
+    match /strong8k_private/{userId} {
+      allow read, write: if isPlatformAdmin();
+    }
+
+    match /support_events/{eventId} {
+      allow read: if isPlatformAdmin()
+        || (isSignedIn()
+          && resource.data.visibility == 'shared'
+          && resource.data.user_id is string
+          && canAccessOwnAccount(resource.data.user_id));
+      allow write: if isPlatformAdmin();
+    }
+
+    match /strong8k_products/{docId} {
+      allow read: if isPlatformAdmin() || currentUserHasApp('strong8k');
+      allow write: if isPlatformAdmin();
+    }
+
+    match /strong8k_renewal_requests/{requestId} {
+      allow read: if isPlatformAdmin()
+        || (isSignedIn()
+          && resource.data.account_id is string
+          && canAccessOwnAccount(resource.data.account_id));
+      allow write: if isPlatformAdmin();
+    }
+
+    // Customer messages are accepted only by the authenticated n8n endpoint.
+    // Email bodies, recipients, outbox leases, and private notes never reach customers.
+    match /communication_threads/{threadId} {
+      allow read, write: if isPlatformAdmin();
+      match /messages/{messageId} {
+        allow read, write: if isPlatformAdmin();
+      }
+    }
+
+    match /communication_outbox/{messageId} { allow read, write: if isPlatformAdmin(); }
+    match /communication_ingest/{messageId} { allow read, write: if isPlatformAdmin(); }
+    match /communication_notifications/{noticeId} { allow read, write: if isPlatformAdmin(); }
+    match /communication_mail_references/{referenceId} { allow read, write: if isPlatformAdmin(); }
+    match /communication_rate_limits/{bucketId} { allow read, write: if isPlatformAdmin(); }
+    match /communication_config/{configId} { allow read, write: if isPlatformAdmin(); }
+
+    match /strong8k_renewal_request_locks/{lockId} {
+      allow read, write: if isPlatformAdmin();
+    }
+
+    // Legacy Strong8K collections kept readable for migration fallback.
+    match /app_config/{docId} {
+      allow read: if isPlatformAdmin() || currentUserHasApp('strong8k');
+      allow write: if isPlatformAdmin();
+    }
+
+    match /products/{docId} {
+      allow read: if isPlatformAdmin() || currentUserHasApp('strong8k');
+      allow write: if isPlatformAdmin();
+    }
+
+    match /business_data/{docId} {
+      allow read, write: if isPlatformAdmin();
+    }
+  }
+}
